@@ -5,9 +5,9 @@
 struct xbee_frame *xbee_create_at_frame(uint8_t req_id, unsigned char cmd[2], void *param, int len)
 {
     struct xbee_frame *frame = malloc(sizeof(struct xbee_frame));
-    frame->delimiter = 0x7E;
+    frame->delimiter = FT_AT_CMD;
     frame->len = 4 + len;
-    frame->frame_type =FT_AT_CMD;
+    frame->frame_type = FT_AT_CMD;
     frame->id = req_id;
 
     unsigned char *data = malloc(2 + len);
@@ -25,6 +25,74 @@ struct xbee_frame *xbee_create_at_frame(uint8_t req_id, unsigned char cmd[2], vo
 
     frame->checksum = 0xFF - checksum;
     return frame;
+}
+
+struct xbee_frame *xbee_create_tx_request_frame(uint8_t req_id, struct xbee_tx_request *r)
+{
+    struct xbee_frame *frame = malloc(sizeof(struct xbee_frame));
+    frame->delimiter = FT_TX_REQUEST;
+    frame->len = 14 + r->len;
+    frame->frame_type = FT_TX_REQUEST;
+    frame->id = req_id;
+
+    unsigned char *data = malloc(12 + r->len);
+    memcpy(data, &r->addr, sizeof(r->addr));
+    memcpy(data + sizeof(r->addr), &r->network, sizeof(r->network));
+    data[11] = r->radius;
+    data[12] = r->opts;
+    memcpy(&data + 12, r->data, r->len);
+
+    uint8_t checksum;
+    checksum = 0;
+    checksum += frame->frame_type + frame->id;
+
+    int x;
+    for(x = 0; x < 12 + r->len; x++) {
+        checksum += data[x];
+    }
+
+    frame->checksum = 0xFF - checksum;
+    return frame;
+}
+
+int xbee_frame_to_at_response(unsigned char *data, struct xbee_at_response *r)
+{
+    if(!data) {
+        return 0;
+    }
+
+    r->id = data[4];
+    r->cmd[0] = data[5];
+    r->cmd[1] = data[6];
+    r->status = (xbee_at_status)data[7];
+    r->reg = NULL;
+
+    uint16_t length;
+    memcpy(&length, &data[1], sizeof(length));
+
+    // if the length indicates that the register data is not empty
+    // copy that into our AT response struct
+    if(length > 5) {
+        memcpy(r->reg, data + 8, length - 5);
+    }
+
+    return 1;
+}
+
+void xbee_free_at_response(struct xbee_at_response *r)
+{
+    if(r) {
+        if(r->reg) {
+            free(r->reg);
+        }
+
+        free(r);
+    }
+}
+
+uint8_t get_frame_id(unsigned char *frame)
+{
+    return (uint8_t)frame[3];
 }
 
 xbee_frame_type get_frame_type(unsigned char *data, int len)

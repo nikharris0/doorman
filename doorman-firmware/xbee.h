@@ -26,6 +26,11 @@ typedef enum {
     AT_STATUS_TX_FAILURE
 } xbee_at_status;
 
+typedef enum {
+    TX_OPT_DISABLE_ACK = 0x01,
+    TX_OPT_ENABLE_APS_ENC = 0x20,
+} tx_request_option;
+
 struct xbee_frame {
     uint8_t delimiter;
     uint16_t len;
@@ -35,11 +40,20 @@ struct xbee_frame {
     uint8_t checksum;
 };
 
+struct xbee_tx_request {
+    uint64_t addr;
+    uint16_t network;
+    uint8_t radius;
+    tx_request_option opts;
+    unsigned char * data;
+    int len;
+};
+
 struct xbee_at_response {
     uint8_t id;
     char cmd[2];
     xbee_at_status status;
-    void *reg;
+    unsigned char *reg;
 };
 
 struct xbee_tx_request_frame {
