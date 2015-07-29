@@ -7,7 +7,7 @@ CC = avr-gcc
 OBJCOPY = avr-objcopy
 CFLAGS += -Wall -g -Os -mmcu=$(MCU)
 
-FILES = main.c radio.c usart.c
+FILES = main.c xbee.c radio.c usart.c
 
 all:
 	avr-gcc $(CFLAGS) -o $(NAME).elf $(FILES)

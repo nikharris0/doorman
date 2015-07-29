@@ -13,8 +13,21 @@ void usart_tx(unsigned char byte)
     UDR = byte;
 }
 
+void usrt_tx_blob(unsigned char *b, unsigned int len)
+{
+    int x;
+    for(x = 0; x < len; x++) {
+        usart_tx(b[x]);
+    }
+}
+
 unsigned char usart_rx(void)
 {
     while( !(UCSRA & (1 << RXC)) );
     return UDR;
+}
+
+int usart_tx_peek(void)
+{
+    return (UCSRA & (1 << RXC));
 }

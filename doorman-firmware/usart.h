@@ -6,6 +6,8 @@
 
 void usart_init(unsigned int, unsigned int);
 void usart_tx(unsigned char);
+void usrt_tx_blob(unsigned char*, unsigned int);
 unsigned char usart_rx(void);
+int usart_tx_peek(void);
 
 #endif
