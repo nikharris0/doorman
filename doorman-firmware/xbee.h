@@ -27,9 +27,44 @@ typedef enum {
 } xbee_at_status;
 
 typedef enum {
+    TX_STATUS_SUCCESS = 0x00,
+    TX_STATUS_MAC_ACK_FAIL = 0x01,
+    TX_STATUS_CCA_FAIL = 0x02,
+    TX_STATUS_INVALID_DEST = 0x15,
+    TX_STATUS_NETWORK_ACK_FAIL = 0x21,
+    TX_STATUS_NO_NETWORK = 0x22,
+    TX_STATUS_SELF_ADDR = 0x23,
+    TX_STATUS_ADDR_NOT_FOUND = 0x24,
+    TX_STATUS_NO_ROUTE = 0x25,
+    TX_STATUS_NO_RELAY = 0x26,
+    TX_STATUS_INVALID_BIND_TABLE = 0x2B,
+    TX_STATUS_RESOURCE_ERR = 0x2C,
+    TX_STATUS_BROADCAST_APS = 0x2D,
+    TX_STATUS_UNICAST_APS = 0x2E,
+    TX_STATUS_RESOURCE2_ERR = 0x32,
+    TX_STATUS_DATA_TOO_LARGE = 0x74,
+    TX_STATUS_IND_MSG_UNREQUEST = 0x75
+} xbee_tx_status;
+
+typedef enum {
+    DISC_STATUS_NO_OVERHEAD = 0x00,
+    DISC_STATUS_ADDR_DISCOVERY = 0x01,
+    DISC_STATUS_RESOURCE_ERR = 0x32,
+    DISC_STATUS_DATA_TOO_LARGE = 0x74,
+    DISC_STATUS_IND_MSG_UNREQUEST = 0x75
+} xbee_discovery_status;
+
+typedef enum {
     TX_OPT_DISABLE_ACK = 0x01,
     TX_OPT_ENABLE_APS_ENC = 0x20,
 } tx_request_option;
+
+typedef enum {
+    RX_OPT_ACK = 0x01,
+    RX_OPT_BROADCAST = 0x01,
+    RX_OPT_APS = 0x20,
+    RX_OPT_END_DEVICE = 0x40
+} rx_packet_option;
 
 struct xbee_frame {
     uint8_t delimiter;
@@ -54,6 +89,23 @@ struct xbee_at_response {
     char cmd[2];
     xbee_at_status status;
     unsigned char *reg;
+};
+
+struct xbee_tx_status {
+    uint8_t id;
+    uint16_t addr;
+    uint8_t retries;
+    uint8_t status;
+    uint8_t discovery_status;
+};
+
+struct xbee_rx_packet {
+    uint8_t id;
+    uint16_t addr;
+    uint8_t network;
+    rx_packet_option opts;
+    unsigned char * data;
+
 };
 
 struct xbee_tx_request_frame {

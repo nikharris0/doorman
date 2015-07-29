@@ -57,7 +57,7 @@ struct xbee_frame *xbee_create_tx_request_frame(uint8_t req_id, struct xbee_tx_r
 
 int xbee_frame_to_at_response(unsigned char *data, struct xbee_at_response *r)
 {
-    if(!data) {
+    if(!data || !r || data[0] != FT_AT_CMD_RESPONSE) {
         return 0;
     }
 
@@ -75,6 +75,21 @@ int xbee_frame_to_at_response(unsigned char *data, struct xbee_at_response *r)
     if(length > 5) {
         memcpy(r->reg, data + 8, length - 5);
     }
+
+    return 1;
+}
+
+int xbee_frame_to_tx_status(unsigned char *data, struct xbee_tx_status *s)
+{
+    if(!data || !s || data[0] != FT_TX_RESPONSE) {
+        return 0;
+    }
+
+    s->id = data[4];
+    memcpy(&s->addr, &data[5], sizeof(s->addr));
+    s->retries = data[7];
+    s->status = data[8];
+    s->discovery_status = data[9];
 
     return 1;
 }
