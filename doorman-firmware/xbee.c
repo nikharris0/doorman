@@ -94,6 +94,23 @@ int xbee_frame_to_tx_status(unsigned char *data, struct xbee_tx_status *s)
     return 1;
 }
 
+int xbee_frame_to_rx_packet(unsigned char *data, struct xbee_rx_packet *p)
+{
+    if(!data || !p || data[0] != FT_RX_RECIEVED) {
+        return 0;
+    }
+
+    memcpy(&p->addr, &data[4], sizeof(p->addr));
+    memcpy(&p->network, &data[12], sizeof(p->network));
+    p->opts = data[14];
+
+    uint16_t len;
+    memcpy(&len, &data[1], sizeof(len));
+    memcpy(p->data, &data[15], len - 12);
+    p->len = len - 12;
+    return 1;
+}
+
 void xbee_free_at_response(struct xbee_at_response *r)
 {
     if(r) {
